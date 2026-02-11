@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGeotab Add-In - Local Development</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F3F4F6;
+            min-height: 100vh;
+        }
+
+        .dev-header {
+            background: #1F2937;
+            color: white;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .dev-header .badge {
+            background: #F59E0B;
+            color: #1F2937;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+
+        .dev-header .user-info {
+            color: #9CA3AF;
+        }
+
+        .dev-header .logout-btn {
+            background: transparent;
+            border: 1px solid #4B5563;
+            color: #D1D5DB;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .dev-header .logout-btn:hover {
+            background: #374151;
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-card h1 {
+            font-size: 24px;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+
+        .login-card p {
+            color: #6B7280;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0078D3;
+            box-shadow: 0 0 0 3px rgba(0, 120, 211, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0078D3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            background: #0066B3;
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-error {
+            background: #FEE2E2;
+            border: 1px solid #FECACA;
+            color: #DC2626;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .login-error.hidden {
+            display: none;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            background: #F9FAFB;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #0078D3;
+            color: white;
+            border-color: #0078D3;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-hint {
+            font-size: 13px;
+            color: #6B7280;
+            margin-bottom: 16px;
+            padding: 10px;
+            background: #F3F4F6;
+            border-radius: 6px;
+        }
+
+        .input-hint {
+            font-size: 11px;
+            color: #9CA3AF;
+            margin-top: 4px;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            padding: 16px;
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .instructions strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #1E40AF;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #1E40AF;
+        }
+
+        .instructions li {
+            margin-bottom: 6px;
+        }
+
+        .instructions code {
+            background: #1E40AF;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            word-break: break-all;
+        }
+
+        .instructions a {
+            color: #1E40AF;
+        }
+
+        .addin-wrapper {
+            display: none;
+        }
+
+        .addin-wrapper.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-container">
+        <div class="login-card">
+            <h1>MyGeotab Login</h1>
+            <p>Connect to your MyGeotab database to test the add-in</p>
+
+            <div id="login-error" class="login-error hidden"></div>
+
+            <div class="tab-buttons">
+                <button type="button" class="tab-btn active" data-tab="session">Use Session (SSO)</button>
+                <button type="button" class="tab-btn" data-tab="password">Use Password</button>
+            </div>
+
+            <!-- Session-based login (for SSO users) -->
+            <form id="session-form" class="tab-content active">
+                <p class="form-hint">For SSO users: Get your session from an existing MyGeotab login.</p>
+                <div class="form-group">
+                    <label for="session-server">Server</label>
+                    <input type="text" id="session-server" placeholder="alpha.geotab.com" value="alpha.geotab.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="session-database">Database</label>
+                    <input type="text" id="session-database" placeholder="g560" required>
+                </div>
+                <div class="form-group">
+                    <label for="session-username">Email</label>
+                    <input type="email" id="session-username" placeholder="your.email@geotab.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="session-id">Session ID</label>
+                    <input type="text" id="session-id" placeholder="Paste session ID here" required>
+                    <p class="input-hint">Get this from browser DevTools on alpha.geotab.com (see instructions below)</p>
+                </div>
+                <button type="submit" id="session-login-btn" class="login-btn">Connect with Session</button>
+
+                <div class="instructions">
+                    <strong>How to get your Session ID:</strong>
+                    <ol>
+                        <li>Log into <a href="https://alpha.geotab.com/g560" target="_blank">alpha.geotab.com/g560</a></li>
+                        <li>Open DevTools (F12 or Cmd+Option+I)</li>
+                        <li>Go to Console tab</li>
+                        <li>Type: <code>JSON.parse(localStorage.getItem('geotabAPI_credentials')).sessionId</code></li>
+                        <li>Copy the result and paste above</li>
+                    </ol>
+                </div>
+            </form>
+
+            <!-- Password-based login -->
+            <form id="login-form" class="tab-content">
+                <div class="form-group">
+                    <label for="server">Server</label>
+                    <input type="text" id="server" placeholder="my.geotab.com" value="my.geotab.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="database">Database</label>
+                    <input type="text" id="database" placeholder="Your database name" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Email</label>
+                    <input type="email" id="username" placeholder="your.email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Your password" required>
+                </div>
+                <button type="submit" id="login-btn" class="login-btn">Connect</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add-in Screen -->
+    <div id="addin-screen" class="addin-wrapper">
+        <div class="dev-header">
+            <div>
+                <span>AI Fault Diagnostics</span>
+                <span class="badge">DEV MODE</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span class="user-info" id="user-display"></span>
+                <button class="logout-btn" id="logout-btn">Logout</button>
+            </div>
+        </div>
+        <div id="addin-content"></div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // Simple MyGeotab API client using direct JSONRPC calls
+            class MyGeotabAPI {
+                constructor(server, database, userName, sessionId) {
+                    this.server = server;
+                    this.database = database;
+                    this.userName = userName;
+                    this.sessionId = sessionId;
+                }
+
+                getUrl() {
+                    return `https://${this.server}/apiv1`;
+                }
+
+                async authenticate(password) {
+                    console.log('Authenticating to:', this.getUrl());
+                    console.log('Database:', this.database, 'User:', this.userName);
+
+                    const response = await fetch(this.getUrl(), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            method: 'Authenticate',
+                            params: {
+                                database: this.database,
+                                userName: this.userName,
+                                password: password
+                            }
+                        })
+                    });
+
+                    const data = await response.json();
+                    console.log('Auth response:', data);
+
+                    if (data.error) {
+                        // Show full error details
+                        const errorMsg = data.error.message || JSON.stringify(data.error);
+                        console.error('Auth error:', data.error);
+                        throw new Error(errorMsg);
+                    }
+
+                    this.sessionId = data.result.credentials.sessionId;
+                    // Update server if redirected (but validate it's a real hostname)
+                    if (data.result.path && data.result.path.includes('.')) {
+                        this.server = data.result.path;
+                        console.log('Redirected to server:', this.server);
+                    } else {
+                        console.log('Ignoring invalid path:', data.result.path, '- keeping server:', this.server);
+                    }
+                    return data.result;
+                }
+
+                call(method, params, successCallback, errorCallback) {
+                    console.log('API call:', method, 'to server:', this.server);
+                    console.log('Full URL:', this.getUrl());
+                    console.log('Params:', params);
+                    const requestBody = {
+                        method: method,
+                        params: {
+                            ...params,
+                            credentials: {
+                                database: this.database,
+                                userName: this.userName,
+                                sessionId: this.sessionId
+                            }
+                        }
+                    };
+
+                    fetch(this.getUrl(), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    })
+                    .then(response => {
+                        console.log('API response status:', response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('API response data:', data);
+                        if (data.error) {
+                            console.error('API error:', data.error);
+                            if (errorCallback) errorCallback(data.error.message || 'API error');
+                        } else {
+                            if (successCallback) successCallback(data.result);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        if (errorCallback) errorCallback(error.message);
+                    });
+                }
+
+                multiCall(calls, successCallback, errorCallback) {
+                    const requestBody = {
+                        method: 'ExecuteMultiCall',
+                        params: {
+                            calls: calls.map(([method, params]) => ({
+                                method: method,
+                                params: params
+                            })),
+                            credentials: {
+                                database: this.database,
+                                userName: this.userName,
+                                sessionId: this.sessionId
+                            }
+                        }
+                    };
+
+                    fetch(this.getUrl(), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            if (errorCallback) errorCallback(data.error.message || 'API error');
+                        } else {
+                            if (successCallback) successCallback(data.result);
+                        }
+                    })
+                    .catch(error => {
+                        if (errorCallback) errorCallback(error.message);
+                    });
+                }
+            }
+
+            // DOM Elements
+            const loginScreen = document.getElementById('login-screen');
+            const addinScreen = document.getElementById('addin-screen');
+            const loginForm = document.getElementById('login-form');
+            const sessionForm = document.getElementById('session-form');
+            const loginError = document.getElementById('login-error');
+            const loginBtn = document.getElementById('login-btn');
+            const sessionLoginBtn = document.getElementById('session-login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const userDisplay = document.getElementById('user-display');
+            const addinContent = document.getElementById('addin-content');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            let api = null;
+            let credentials = null;
+
+            // Tab switching
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(tab === 'session' ? 'session-form' : 'login-form').classList.add('active');
+                    loginError.classList.add('hidden');
+                });
+            });
+
+            // Session-based login (for SSO users)
+            sessionForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                loginError.classList.add('hidden');
+                sessionLoginBtn.disabled = true;
+                sessionLoginBtn.textContent = 'Connecting...';
+
+                const server = document.getElementById('session-server').value.trim();
+                const database = document.getElementById('session-database').value.trim();
+                const username = document.getElementById('session-username').value.trim();
+                const sessionId = document.getElementById('session-id').value.trim();
+
+                api = new MyGeotabAPI(server, database, username, sessionId);
+
+                // Verify the session works
+                console.log('Verifying session with server:', server);
+                api.call('GetVersion', {},
+                    function(result) {
+                        console.log('Session verified, version:', result);
+                        console.log('Using server:', api.server);
+                        credentials = {
+                            server: api.server,  // Use the actual server from API object
+                            database: database,
+                            userName: username,
+                            sessionId: sessionId
+                        };
+                        console.log('Stored credentials:', credentials);
+                        localStorage.setItem('mygeotab_dev_session', JSON.stringify(credentials));
+                        loadAddin();
+                    },
+                    function(error) {
+                        sessionLoginBtn.disabled = false;
+                        sessionLoginBtn.textContent = 'Connect with Session';
+                        loginError.textContent = 'Session invalid: ' + error;
+                        loginError.classList.remove('hidden');
+                    }
+                );
+            });
+
+            // Check for saved session
+            const savedSession = localStorage.getItem('mygeotab_dev_session');
+            console.log('Saved session from localStorage:', savedSession);
+            if (savedSession) {
+                try {
+                    credentials = JSON.parse(savedSession);
+                    console.log('Parsed credentials:', credentials);
+                    console.log('Server from credentials:', credentials.server);
+                    api = new MyGeotabAPI(
+                        credentials.server,
+                        credentials.database,
+                        credentials.userName,
+                        credentials.sessionId
+                    );
+                    console.log('API created with server:', api.server);
+                    // Verify session is still valid
+                    api.call('GetVersion', {},
+                        function(result) {
+                            console.log('Session still valid, loading add-in');
+                            loadAddin();
+                        },
+                        function(error) {
+                            console.log('Saved session expired, clearing');
+                            localStorage.removeItem('mygeotab_dev_session');
+                            credentials = null;
+                            api = null;
+                        }
+                    );
+                } catch (e) {
+                    console.error('Error parsing saved session:', e);
+                    localStorage.removeItem('mygeotab_dev_session');
+                }
+            }
+
+            // Login form handler
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                loginError.classList.add('hidden');
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Connecting...';
+
+                const server = document.getElementById('server').value.trim();
+                const database = document.getElementById('database').value.trim();
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+
+                api = new MyGeotabAPI(server, database, username, null);
+
+                try {
+                    const result = await api.authenticate(password);
+
+                    credentials = {
+                        server: api.server,
+                        database: database,
+                        userName: username,
+                        sessionId: api.sessionId
+                    };
+
+                    localStorage.setItem('mygeotab_dev_session', JSON.stringify(credentials));
+                    loadAddin();
+                } catch (error) {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Connect';
+                    loginError.textContent = 'Authentication failed: ' + error.message;
+                    loginError.classList.remove('hidden');
+                }
+            });
+
+            // Logout handler
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('mygeotab_dev_session');
+                credentials = null;
+                api = null;
+                addinScreen.classList.remove('active');
+                loginScreen.style.display = 'flex';
+                addinContent.innerHTML = '';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Connect';
+            });
+
+            // Load the add-in
+            function loadAddin() {
+                loginScreen.style.display = 'none';
+                addinScreen.classList.add('active');
+                userDisplay.textContent = credentials.userName + ' @ ' + credentials.database;
+
+                // Load add-in HTML
+                fetch('index.html')
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+
+                        // Load CSS
+                        const cssLink = document.createElement('link');
+                        cssLink.rel = 'stylesheet';
+                        cssLink.href = 'styles.css';
+                        document.head.appendChild(cssLink);
+
+                        // Insert HTML content
+                        addinContent.innerHTML = doc.body.innerHTML;
+
+                        // Load JS
+                        const script = document.createElement('script');
+                        script.src = 'main.js';
+                        script.onload = function() {
+                            initializeAddin();
+                        };
+                        document.body.appendChild(script);
+                    })
+                    .catch(error => {
+                        addinContent.innerHTML = '<div style="padding: 40px; color: red;">Failed to load add-in: ' + error + '</div>';
+                    });
+            }
+
+            // Initialize the add-in
+            function initializeAddin() {
+                const apiWrapper = {
+                    call: function(method, params, successCallback, errorCallback) {
+                        api.call(method, params, successCallback, errorCallback);
+                    },
+                    multiCall: function(calls, successCallback, errorCallback) {
+                        api.multiCall(calls, successCallback, errorCallback);
+                    },
+                    getSession: function(callback) {
+                        callback(credentials);
+                    }
+                };
+
+                const state = {
+                    getState: function() { return {}; },
+                    setState: function(obj) {},
+                    gotoPage: function(page, params) {
+                        console.log('Navigate to:', page, params);
+                    },
+                    hasAccessToPage: function() { return true; },
+                    getGroupFilter: function() { return []; }
+                };
+
+                if (window.geotab && window.geotab.addin && window.geotab.addin.aiFaultDiagnostics) {
+                    const addin = window.geotab.addin.aiFaultDiagnostics();
+                    addin.initialize(apiWrapper, state, function() {
+                        console.log('Add-in initialized successfully');
+                        addin.focus(apiWrapper, state);
+                    });
+                } else {
+                    console.error('Add-in not found. Check main.js');
+                    addinContent.innerHTML += '<div style="padding: 20px; color: orange;">Warning: Add-in initialization failed. Check browser console.</div>';
+                }
+            }
+
+            // Create geotab namespace
+            window.geotab = window.geotab || {};
+            window.geotab.addin = window.geotab.addin || {};
+
+            // Expose api globally for debugging
+            window.api = null;
+            Object.defineProperty(window, 'api', {
+                get: function() { return api; },
+                set: function(v) { api = v; }
+            });
+
+        })();
+    </script>
+</body>
+</html>
