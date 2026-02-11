@@ -1,0 +1,17 @@
+{
+    "name": "AI Fault Diagnostics",
+    "supportEmail": "mohamedsoliman@geotab.com",
+    "version": "2.0.0",
+    "enableViewSecurityId": true,
+    "items": [
+        {
+            "page": "aiFaultDiagnostics",
+            "title": "AI Fault Diagnostics",
+            "menuName": "AI Diagnostics",
+            "path": "Maintenance/",
+            "menuId": "MaintenanceLink",
+            "icon": "https://storage.googleapis.com/YOUR_BUCKET_NAME/icon.svg",
+            "url": "https://storage.googleapis.com/YOUR_BUCKET_NAME/index.html"
+        }
+    ]
+}
