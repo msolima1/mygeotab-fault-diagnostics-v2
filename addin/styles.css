@@ -857,3 +857,75 @@ select:focus-visible {
     outline: 2px solid #0078D3;
     outline-offset: 2px;
 }
+
+/* Analysis Results Styling */
+.analysis-summary {
+    margin-bottom: 12px;
+    padding: 10px;
+    background-color: #F0F9FF;
+    border-left: 3px solid #0078D3;
+    border-radius: 4px;
+}
+
+.severity-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.severity-low {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.severity-medium {
+    background-color: #FEF3C7;
+    color: #92400E;
+}
+
+.severity-high {
+    background-color: #FEE2E2;
+    color: #991B1B;
+}
+
+.severity-critical {
+    background-color: #7F1D1D;
+    color: #FFFFFF;
+}
+
+.analysis-section {
+    margin-bottom: 16px;
+}
+
+.analysis-section strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #374151;
+}
+
+.summary-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-list li {
+    padding: 6px 0 6px 20px;
+    position: relative;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.summary-list li:last-child {
+    border-bottom: none;
+}
+
+.summary-list li::before {
+    content: "•";
+    position: absolute;
+    left: 6px;
+    color: #0078D3;
+    font-weight: bold;
+}

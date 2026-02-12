@@ -720,20 +720,38 @@ Respond with a brief JSON object (keep it concise):
         let claudeSummary = '';
         if (claudeResult.parsed && claudeResult.data) {
             const analysis = claudeResult.data;
-            const items = [];
+            let html = '';
 
-            if (analysis.recommendedActions && analysis.recommendedActions.length > 0) {
-                items.push(...analysis.recommendedActions.slice(0, 3));
+            // Summary
+            if (analysis.summary) {
+                html += `<p class="analysis-summary"><strong>Summary:</strong> ${analysis.summary}</p>`;
             }
-            if (analysis.actionsToTake && analysis.actionsToTake.length > 0) {
-                analysis.actionsToTake.slice(0, 2).forEach(item => {
-                    items.push(`${item.priority ? item.priority.toUpperCase() + ': ' : ''}${item.action}`);
+
+            // Severity badge
+            if (analysis.severity) {
+                const severityClass = analysis.severity.toLowerCase();
+                html += `<p class="severity-badge severity-${severityClass}">Severity: ${analysis.severity.toUpperCase()}</p>`;
+            }
+
+            // Possible causes
+            if (analysis.causes && analysis.causes.length > 0) {
+                html += '<div class="analysis-section"><strong>Possible Causes:</strong><ul class="summary-list">';
+                analysis.causes.forEach(cause => {
+                    html += `<li>${cause}</li>`;
                 });
+                html += '</ul></div>';
             }
 
-            claudeSummary = items.length > 0
-                ? '<ul class="summary-list">' + items.map(i => `<li>${i}</li>`).join('') + '</ul>'
-                : formatTextToHtml(claudeResult.raw);
+            // Recommended actions
+            if (analysis.actions && analysis.actions.length > 0) {
+                html += '<div class="analysis-section"><strong>Recommended Actions:</strong><ul class="summary-list">';
+                analysis.actions.forEach(action => {
+                    html += `<li>${action}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            claudeSummary = html || formatTextToHtml(claudeResult.raw);
         } else {
             claudeSummary = formatTextToHtml(claudeResult.raw);
         }
