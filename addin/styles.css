@@ -49,6 +49,50 @@ body {
     color: #6B7280;
 }
 
+/* Instructions Section */
+.instructions-section {
+    margin-bottom: 24px;
+}
+
+.instructions-card {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border: 1px solid #BFDBFE;
+    border-radius: 8px;
+    padding: 16px 20px;
+}
+
+.instructions-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1E40AF;
+    margin: 0 0 8px 0;
+}
+
+.instructions-card h3:not(:first-child) {
+    margin-top: 12px;
+}
+
+.instructions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.instructions-list li {
+    font-size: 13px;
+    color: #1F2937;
+    padding: 4px 0 4px 20px;
+    position: relative;
+}
+
+.instructions-list li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #3B82F6;
+    font-weight: bold;
+}
+
 /* Section Headers */
 .section-header {
     display: flex;
