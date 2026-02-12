@@ -57,12 +57,25 @@ exports.handler = async (event, context) => {
         };
     }
 
-    const { query, prompt } = body;
-    if (!query || !prompt) {
+    const { faultCode, faultName, query, prompt } = body;
+
+    // Support both old format (query/prompt) and new format (faultCode/faultName)
+    const searchQuery = query || `${faultCode} ${faultName}`;
+    const searchPrompt = prompt || `You are an automotive expert. Search YouTube videos and Reddit discussions about this vehicle fault code: ${faultCode} - ${faultName}
+
+Provide a summary of what real mechanics and vehicle owners say about:
+1. Common causes they've found
+2. DIY fixes that worked
+3. Estimated repair costs mentioned
+4. Tips and warnings from experience
+
+Format your response in a helpful, practical way.`;
+
+    if (!searchQuery || searchQuery === 'undefined undefined') {
         return {
             statusCode: 400,
             headers,
-            body: JSON.stringify({ error: 'query and prompt are required in request body' })
+            body: JSON.stringify({ error: 'faultCode and faultName (or query and prompt) are required' })
         };
     }
 
@@ -73,7 +86,7 @@ exports.handler = async (event, context) => {
             max_tokens: 2048,
             messages: [{
                 role: 'user',
-                content: `${prompt}\n\nTopic: ${query}`
+                content: searchPrompt
             }]
         });
 
