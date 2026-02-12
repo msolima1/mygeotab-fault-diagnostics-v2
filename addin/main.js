@@ -404,20 +404,6 @@ geotab.addin.aiFaultDiagnostics = function () {
         const item = document.createElement('div');
         item.className = 'fault-item';
 
-        // Determine severity class
-        let severityClass = 'severity-low';
-        let severityText = 'Low';
-        if (fault.redStopLamp) {
-            severityClass = 'severity-critical';
-            severityText = 'Critical';
-        } else if (fault.amberWarningLamp) {
-            severityClass = 'severity-warning';
-            severityText = 'Warning';
-        } else if (fault.malfunctionLamp) {
-            severityClass = 'severity-medium';
-            severityText = 'Medium';
-        }
-
         // Get fault code
         const faultCode = getFaultCode(fault, diagnostic);
         const faultName = diagnostic ? diagnostic.name : 'Unknown Fault';
@@ -426,7 +412,6 @@ geotab.addin.aiFaultDiagnostics = function () {
         item.innerHTML = `
             <div class="fault-header">
                 <div class="fault-code-badge">${faultCode}</div>
-                <span class="severity-badge ${severityClass}">${severityText}</span>
             </div>
             <div class="fault-details">
                 <h4 class="fault-name">${faultName}</h4>
