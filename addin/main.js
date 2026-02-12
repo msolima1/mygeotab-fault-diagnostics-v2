@@ -580,19 +580,15 @@ OCCURRENCES: ${faultData.occurrences}`;
             context += `\nDIAGNOSTIC NAME: ${diagnostic.name}`;
         }
 
-        // Add severity indicators - determine vehicle-reported severity
-        let vehicleSeverity = 'low';
+        // Add lamp status info
         if (fault.redStopLamp) {
-            context += '\nVEHICLE LAMP: Red Stop Lamp Active (Critical)';
-            vehicleSeverity = 'critical';
+            context += '\nVEHICLE LAMP: Red Stop Lamp Active';
         } else if (fault.amberWarningLamp) {
-            context += '\nVEHICLE LAMP: Amber Warning Lamp Active (High)';
-            vehicleSeverity = 'high';
+            context += '\nVEHICLE LAMP: Amber Warning Lamp Active';
         } else if (fault.malfunctionLamp) {
-            context += '\nVEHICLE LAMP: Malfunction Indicator Lamp Active (Medium)';
-            vehicleSeverity = 'medium';
+            context += '\nVEHICLE LAMP: Malfunction Indicator Lamp Active';
         } else {
-            context += '\nVEHICLE LAMP: No warning lamps active (Low)';
+            context += '\nVEHICLE LAMP: No warning lamps currently active';
         }
 
         if (fault.recommendation) {
@@ -605,8 +601,9 @@ OCCURRENCES: ${faultData.occurrences}`;
 
         context += `
 
-Respond with JSON only. Use severity "${vehicleSeverity}" to match vehicle lamp status:
-{"summary":"1 sentence","causes":["cause1","cause2"],"actions":["action1","action2"],"severity":"${vehicleSeverity}"}`;
+Assess severity based on the FAULT CODE itself (not just lamp status). Use: low (minor issue), medium (should fix soon), high (fix promptly), critical (stop driving).
+Respond with JSON only:
+{"summary":"1 sentence","causes":["cause1","cause2"],"actions":["action1","action2"],"severity":"low|medium|high|critical"}`;
 
         return context;
     }
