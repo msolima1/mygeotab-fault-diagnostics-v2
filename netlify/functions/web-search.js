@@ -67,14 +67,13 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // Build request to GenAI Gateway with web search
+        // Build request to GenAI Gateway
         const postData = JSON.stringify({
             model: 'claude-haiku-4.5',
             max_tokens: 2048,
-            web_search: true,
             messages: [{
                 role: 'user',
-                content: `Search query: ${query}\n\n${prompt}`
+                content: `${prompt}\n\nTopic: ${query}`
             }]
         });
 
