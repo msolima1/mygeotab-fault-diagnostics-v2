@@ -580,13 +580,19 @@ OCCURRENCES: ${faultData.occurrences}`;
             context += `\nDIAGNOSTIC NAME: ${diagnostic.name}`;
         }
 
-        // Add severity indicators
+        // Add severity indicators - determine vehicle-reported severity
+        let vehicleSeverity = 'low';
         if (fault.redStopLamp) {
-            context += '\nSEVERITY: CRITICAL - Red Stop Lamp Active';
+            context += '\nVEHICLE LAMP: Red Stop Lamp Active (Critical)';
+            vehicleSeverity = 'critical';
         } else if (fault.amberWarningLamp) {
-            context += '\nSEVERITY: WARNING - Amber Warning Lamp Active';
+            context += '\nVEHICLE LAMP: Amber Warning Lamp Active (High)';
+            vehicleSeverity = 'high';
         } else if (fault.malfunctionLamp) {
-            context += '\nSEVERITY: MEDIUM - Malfunction Indicator Lamp Active';
+            context += '\nVEHICLE LAMP: Malfunction Indicator Lamp Active (Medium)';
+            vehicleSeverity = 'medium';
+        } else {
+            context += '\nVEHICLE LAMP: No warning lamps active (Low)';
         }
 
         if (fault.recommendation) {
@@ -599,8 +605,8 @@ OCCURRENCES: ${faultData.occurrences}`;
 
         context += `
 
-Respond with a brief JSON object (keep it concise):
-{"summary":"1 sentence","causes":["cause1","cause2"],"actions":["action1","action2"],"severity":"low|medium|high"}`;
+Respond with JSON only. Use severity "${vehicleSeverity}" to match vehicle lamp status:
+{"summary":"1 sentence","causes":["cause1","cause2"],"actions":["action1","action2"],"severity":"${vehicleSeverity}"}`;
 
         return context;
     }
@@ -756,20 +762,64 @@ Respond with a brief JSON object (keep it concise):
             claudeSummary = formatTextToHtml(claudeResult.raw);
         }
 
-        // Build Web Search summary (YouTube/Reddit)
+        // Parse Web Search JSON result
+        let webData = null;
         let webSummary = '';
-        if (webSearchResult.content) {
-            // Parse bullet points from the response
-            const lines = webSearchResult.content.split('\n').filter(line => line.trim());
-            const bulletPoints = lines.filter(line => line.match(/^[\s]*[•\-\*]/));
+        let costHtml = '';
 
-            if (bulletPoints.length > 0) {
-                webSummary = '<ul class="summary-list">' +
-                    bulletPoints.map(bp => `<li>${bp.replace(/^[\s]*[•\-\*]\s*/, '')}</li>`).join('') +
-                    '</ul>';
-            } else {
-                webSummary = formatTextToHtml(webSearchResult.content);
+        if (webSearchResult.content) {
+            try {
+                // Try to parse JSON from response
+                let jsonStr = webSearchResult.content;
+                const jsonMatch = webSearchResult.content.match(/```(?:json)?\s*([\s\S]*?)```/);
+                if (jsonMatch) {
+                    jsonStr = jsonMatch[1];
+                }
+                webData = JSON.parse(jsonStr);
+            } catch (e) {
+                // Fallback to raw text
+                webData = null;
             }
+        }
+
+        if (webData) {
+            let html = '';
+
+            // DIY Fixes
+            if (webData.diyFixes && webData.diyFixes.length > 0) {
+                html += '<div class="analysis-section"><strong>DIY Fixes:</strong><ul class="summary-list">';
+                webData.diyFixes.forEach(fix => {
+                    html += `<li>${fix}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            // Tips from mechanics
+            if (webData.tips && webData.tips.length > 0) {
+                html += '<div class="analysis-section"><strong>Mechanic Tips:</strong><ul class="summary-list">';
+                webData.tips.forEach(tip => {
+                    html += `<li>${tip}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            webSummary = html || '<p class="no-data">No community insights available</p>';
+
+            // Build cost estimate box
+            if (webData.repairCost) {
+                const cost = webData.repairCost;
+                costHtml = `
+                    <div class="cost-estimate">
+                        <div class="cost-range">
+                            <span class="cost-label">Estimated Repair Cost</span>
+                            <span class="cost-value">$${cost.low || '?'} - $${cost.high || '?'}</span>
+                        </div>
+                        <p class="cost-note">Based on typical repair costs reported by mechanics</p>
+                    </div>
+                `;
+            }
+        } else if (webSearchResult.content) {
+            webSummary = formatTextToHtml(webSearchResult.content);
         } else {
             webSummary = '<p class="no-data">No community insights available</p>';
         }
@@ -779,22 +829,22 @@ Respond with a brief JSON object (keep it concise):
             <div class="source-links">
                 <a href="https://www.youtube.com/results?search_query=${searchQuery}" target="_blank" rel="noopener" class="source-link youtube-link">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                    Search YouTube
+                    YouTube
                 </a>
                 <a href="https://www.reddit.com/search/?q=${searchQuery}" target="_blank" rel="noopener" class="source-link reddit-link">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
-                    Search Reddit
+                    Reddit
                 </a>
             </div>
         `;
 
-        // Display in comparison table
+        // Display in comparison table with 3 columns
         const comparisonHtml = `
-            <div class="comparison-table">
+            <div class="comparison-table three-column">
                 <div class="comparison-column claude-column">
                     <div class="column-header">
                         <span class="column-icon">🤖</span>
-                        <h4>Claude AI Analysis</h4>
+                        <h4>AI Analysis</h4>
                     </div>
                     <div class="column-content">
                         ${claudeSummary}
@@ -803,11 +853,20 @@ Respond with a brief JSON object (keep it concise):
                 <div class="comparison-column community-column">
                     <div class="column-header">
                         <span class="column-icon">🌐</span>
-                        <h4>YouTube & Reddit Insights</h4>
+                        <h4>Community Insights</h4>
                     </div>
                     <div class="column-content">
                         ${webSummary}
                         ${sourceLinks}
+                    </div>
+                </div>
+                <div class="comparison-column cost-column">
+                    <div class="column-header">
+                        <span class="column-icon">💰</span>
+                        <h4>Repair Cost</h4>
+                    </div>
+                    <div class="column-content">
+                        ${costHtml || '<p class="no-data">Cost estimate unavailable</p>'}
                     </div>
                 </div>
             </div>

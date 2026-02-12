@@ -61,7 +61,8 @@ exports.handler = async (event, context) => {
 
     // Support both old format (query/prompt) and new format (faultCode/faultName)
     const searchQuery = query || `${faultCode} ${faultName}`;
-    const searchPrompt = prompt || `For fault code ${faultCode} (${faultName}), briefly list: 1) Common DIY fixes 2) Typical repair costs 3) Key tips from mechanics. Be concise.`;
+    const searchPrompt = prompt || `For fault code ${faultCode} (${faultName}), respond with JSON only:
+{"diyFixes":["fix1","fix2"],"repairCost":{"low":100,"high":500,"currency":"USD"},"tips":["tip1","tip2"]}`;
 
     if (!searchQuery || searchQuery === 'undefined undefined') {
         return {

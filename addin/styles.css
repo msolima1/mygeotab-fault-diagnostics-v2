@@ -665,6 +665,47 @@ body {
     margin-bottom: 16px;
 }
 
+.comparison-table.three-column {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* Cost estimate styling */
+.cost-column {
+    background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+}
+
+.cost-estimate {
+    text-align: center;
+    padding: 16px;
+}
+
+.cost-range {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cost-label {
+    font-size: 12px;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.cost-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #059669;
+}
+
+.cost-note {
+    font-size: 11px;
+    color: #6B7280;
+    font-style: italic;
+}
+
 .comparison-column {
     background: #F9FAFB;
     border: 1px solid #E5E7EB;
@@ -829,7 +870,8 @@ body {
         width: 100%;
     }
 
-    .comparison-table {
+    .comparison-table,
+    .comparison-table.three-column {
         grid-template-columns: 1fr;
     }
 
