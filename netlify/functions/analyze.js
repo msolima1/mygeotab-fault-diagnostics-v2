@@ -1,0 +1,133 @@
+/**
+ * Netlify Function - AI Fault Diagnostics Proxy
+ *
+ * Proxies requests to the Geotab GenAI Gateway for Claude API access.
+ *
+ * Environment Variables (set in Netlify dashboard):
+ *   GENAI_TOKEN - Your GenAI gateway JWT token (required)
+ *   GENAI_URL - GenAI gateway URL (default: https://genai-us.geotab.com/api/v2)
+ */
+
+const https = require('https');
+
+const GENAI_URL = process.env.GENAI_URL || 'https://genai-us.geotab.com/api/v2';
+const GENAI_TOKEN = process.env.GENAI_TOKEN;
+
+exports.handler = async (event, context) => {
+    // CORS headers
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Content-Type': 'application/json'
+    };
+
+    // Handle preflight OPTIONS request
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 204, headers, body: '' };
+    }
+
+    // Only allow POST
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            headers,
+            body: JSON.stringify({ error: 'Method not allowed' })
+        };
+    }
+
+    // Check for token configuration
+    if (!GENAI_TOKEN) {
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: 'GENAI_TOKEN environment variable not configured' })
+        };
+    }
+
+    // Parse and validate request body
+    let body;
+    try {
+        body = JSON.parse(event.body || '{}');
+    } catch (e) {
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'Invalid JSON in request body' })
+        };
+    }
+
+    const { prompt } = body;
+    if (!prompt) {
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'prompt is required in request body' })
+        };
+    }
+
+    try {
+        // Build request to GenAI Gateway
+        const postData = JSON.stringify({
+            model: 'claude-haiku-4.5',
+            max_tokens: 2048,
+            messages: [{
+                role: 'user',
+                content: prompt
+            }]
+        });
+
+        const gatewayUrl = new URL(GENAI_URL + '/chat/completions');
+
+        const options = {
+            hostname: gatewayUrl.hostname,
+            port: 443,
+            path: gatewayUrl.pathname,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + GENAI_TOKEN,
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        };
+
+        // Make request to GenAI Gateway
+        const response = await new Promise((resolve, reject) => {
+            const proxyReq = https.request(options, (proxyRes) => {
+                let data = '';
+                proxyRes.on('data', chunk => { data += chunk; });
+                proxyRes.on('end', () => {
+                    try {
+                        const parsed = JSON.parse(data);
+                        resolve({ statusCode: proxyRes.statusCode, body: parsed });
+                    } catch (e) {
+                        reject(new Error('Invalid JSON response from GenAI Gateway'));
+                    }
+                });
+            });
+
+            proxyReq.on('error', reject);
+            proxyReq.setTimeout(9000, () => {
+                proxyReq.destroy();
+                reject(new Error('Request timeout'));
+            });
+
+            proxyReq.write(postData);
+            proxyReq.end();
+        });
+
+        return {
+            statusCode: response.statusCode,
+            headers,
+            body: JSON.stringify(response.body)
+        };
+
+    } catch (error) {
+        console.error('Error calling GenAI Gateway:', error);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: error.message || 'Internal server error' })
+        };
+    }
+};

@@ -8,11 +8,12 @@
 geotab.addin.aiFaultDiagnostics = function () {
     'use strict';
 
-    // Configuration - UPDATE THIS URL after deploying the Cloud Function
-    // For local development: /api/claude (dev-server.js proxy)
-    // For production: https://YOUR-REGION-YOUR-PROJECT.cloudfunctions.net/analyze
-    const AI_ENDPOINT = '/api/claude';
-    const WEB_SEARCH_ENDPOINT = '/api/web-search';
+    // Configuration - UPDATE THIS URL after deploying to Netlify
+    // For local development: '' (uses relative paths with dev-server.js)
+    // For production: 'https://YOUR-SITE.netlify.app' (your Netlify URL)
+    const API_BASE_URL = 'https://YOUR-SITE.netlify.app';
+    const AI_ENDPOINT = API_BASE_URL + '/api/claude';
+    const WEB_SEARCH_ENDPOINT = API_BASE_URL + '/api/web-search';
 
     // Private variables
     let api;
