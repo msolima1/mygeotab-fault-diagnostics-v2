@@ -599,27 +599,8 @@ OCCURRENCES: ${faultData.occurrences}`;
 
         context += `
 
-Please provide your analysis in the following JSON format:
-{
-    "recommendedActions": [
-        "Action 1",
-        "Action 2",
-        "Action 3"
-    ],
-    "effectOnComponents": [
-        "Effect 1",
-        "Effect 2"
-    ],
-    "actionsToTake": [
-        {
-            "priority": "immediate|soon|scheduled",
-            "action": "Description of action",
-            "reason": "Why this action is needed"
-        }
-    ]
-}
-
-Provide practical, actionable advice that a fleet manager or technician can use. Be specific about components and procedures.`;
+Respond with a brief JSON object (keep it concise):
+{"summary":"1 sentence","causes":["cause1","cause2"],"actions":["action1","action2"],"severity":"low|medium|high"}`;
 
         return context;
     }

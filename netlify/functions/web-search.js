@@ -61,15 +61,7 @@ exports.handler = async (event, context) => {
 
     // Support both old format (query/prompt) and new format (faultCode/faultName)
     const searchQuery = query || `${faultCode} ${faultName}`;
-    const searchPrompt = prompt || `You are an automotive expert. Search YouTube videos and Reddit discussions about this vehicle fault code: ${faultCode} - ${faultName}
-
-Provide a summary of what real mechanics and vehicle owners say about:
-1. Common causes they've found
-2. DIY fixes that worked
-3. Estimated repair costs mentioned
-4. Tips and warnings from experience
-
-Format your response in a helpful, practical way.`;
+    const searchPrompt = prompt || `For fault code ${faultCode} (${faultName}), briefly list: 1) Common DIY fixes 2) Typical repair costs 3) Key tips from mechanics. Be concise.`;
 
     if (!searchQuery || searchQuery === 'undefined undefined') {
         return {
@@ -83,7 +75,7 @@ Format your response in a helpful, practical way.`;
         // Build request to GenAI Gateway
         const postData = JSON.stringify({
             model: 'claude-haiku-4.5',
-            max_tokens: 2048,
+            max_tokens: 500,
             messages: [{
                 role: 'user',
                 content: searchPrompt
@@ -120,7 +112,7 @@ Format your response in a helpful, practical way.`;
             });
 
             proxyReq.on('error', reject);
-            proxyReq.setTimeout(9000, () => {
+            proxyReq.setTimeout(25000, () => {
                 proxyReq.destroy();
                 reject(new Error('Request timeout'));
             });

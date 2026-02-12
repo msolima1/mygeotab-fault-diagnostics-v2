@@ -1,0 +1,13 @@
+{
+  "name": "AI Fault Diagnostics",
+  "supportEmail": "msoliman@geotab.com",
+  "version": "1.0",
+  "items": [{
+    "url": "https://YOUR-NGROK-URL.ngrok-free.app/index.html",
+    "path": "MaintenanceLink",
+    "menuName": {
+      "en": "AI Diagnostics"
+    },
+    "icon": "https://YOUR-NGROK-URL.ngrok-free.app/icon.svg"
+  }]
+}
