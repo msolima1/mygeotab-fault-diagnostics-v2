@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fault Diagnostics</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="fault-diagnostics-addin" class="addin-container">
+        <!-- Header Section -->
+        <header class="addin-header">
+            <h1>AI Fault Diagnostics</h1>
+            <p class="subtitle">Analyze vehicle fault codes with AI-powered recommendations</p>
+        </header>
+
+        <!-- API Key Configuration -->
+        <section id="api-config" class="config-section" style="display: none;">
+            <div class="config-card">
+                <label for="gemini-api-key">Claude API Key</label>
+                <div class="input-group">
+                    <input type="password" id="claude-api-key" placeholder="Enter your Claude API key">
+                    <button id="save-api-key" class="btn btn-primary">Save</button>
+                </div>
+                <p class="hint">Your API key is stored locally in your browser.</p>
+            </div>
+        </section>
+
+        <!-- Vehicle Selection -->
+        <section id="vehicle-section" class="vehicle-section">
+            <div class="section-header">
+                <h2>Select Asset</h2>
+                <span id="vehicle-count" class="vehicle-count"></span>
+            </div>
+            <div class="search-wrapper">
+                <input type="text" id="vehicle-search" placeholder="Search assets..." autocomplete="off">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M7 12C9.76142 12 12 9.76142 12 7C12 4.23858 9.76142 2 7 2C4.23858 2 2 4.23858 2 7C2 9.76142 4.23858 12 7 12Z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M14 14L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="select-wrapper">
+                <select id="vehicle-select" size="8">
+                    <option value="">Loading vehicles...</option>
+                </select>
+            </div>
+            <div class="date-range-wrapper">
+                <div class="date-input-group">
+                    <label for="from-date">From</label>
+                    <input type="date" id="from-date">
+                </div>
+                <div class="date-input-group">
+                    <label for="to-date">To</label>
+                    <input type="date" id="to-date">
+                </div>
+            </div>
+            <button id="fetch-faults-btn" class="btn btn-primary" disabled>
+                Fetch Fault Codes
+            </button>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+
+        <!-- Fault Codes List -->
+        <section id="faults-section" class="faults-section hidden">
+            <div class="section-header">
+                <h2>Active Fault Codes</h2>
+                <span id="fault-count" class="badge">0</span>
+            </div>
+            <div id="faults-list" class="faults-list">
+                <!-- Fault items will be inserted here -->
+            </div>
+        </section>
+
+        <!-- AI Analysis Panel -->
+        <section id="analysis-section" class="analysis-section hidden">
+            <div class="section-header">
+                <h2>AI Diagnostic Analysis</h2>
+                <button id="close-analysis" class="btn btn-icon" aria-label="Close analysis">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="selected-fault-info" class="selected-fault-info">
+                <!-- Selected fault details -->
+            </div>
+
+            <div id="ai-loading" class="ai-loading hidden">
+                <div class="spinner"></div>
+                <p>Analyzing fault code with AI...</p>
+            </div>
+
+            <div id="ai-results" class="ai-results hidden">
+                <!-- Comparison Table -->
+                <div id="analysis-comparison" class="result-content">
+                    <!-- Comparison table inserted by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Message -->
+        <div id="error-message" class="error-message hidden">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 6V10M10 14H10.01M19 10C19 14.9706 14.9706 19 10 19C5.02944 19 1 14.9706 1 10C1 5.02944 5.02944 1 10 1C14.9706 1 19 5.02944 19 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="error-text"></span>
+        </div>
+
+        <!-- No Faults Message -->
+        <div id="no-faults" class="no-faults hidden">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M24 44C35.0457 44 44 35.0457 44 24C44 12.9543 35.0457 4 24 4C12.9543 4 4 12.9543 4 24C4 35.0457 12.9543 44 24 44Z" stroke="#10B981" stroke-width="3"/>
+                <path d="M16 24L22 30L34 18" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3>No Active Faults</h3>
+            <p>This vehicle has no active fault codes.</p>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

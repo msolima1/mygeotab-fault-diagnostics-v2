@@ -1,0 +1,26 @@
+[build]
+  # Directory with static files (add-in)
+  publish = "addin"
+  # Directory with serverless functions
+  functions = "netlify/functions"
+
+[functions]
+  # Node.js version for functions
+  node_bundler = "esbuild"
+
+# Redirects for cleaner API paths
+[[redirects]]
+  from = "/api/claude"
+  to = "/.netlify/functions/analyze"
+  status = 200
+
+[[redirects]]
+  from = "/api/web-search"
+  to = "/.netlify/functions/web-search"
+  status = 200
+
+# Headers for CORS
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"

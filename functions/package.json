@@ -1,0 +1,25 @@
+{
+  "name": "mygeotab-fault-diagnostics-function",
+  "version": "2.0.0",
+  "description": "Google Cloud Function proxy for AI Fault Diagnostics Add-In",
+  "main": "index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "gcloud functions deploy analyze --runtime nodejs20 --trigger-http --allow-unauthenticated --set-env-vars GENAI_TOKEN=$GENAI_TOKEN,GENAI_URL=https://genai-us.geotab.com/api/v2"
+  },
+  "keywords": [
+    "mygeotab",
+    "geotab",
+    "fault-diagnostics",
+    "ai",
+    "cloud-function"
+  ],
+  "author": "Geotab",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/functions-framework": "^5.0.1"
+  }
+}
